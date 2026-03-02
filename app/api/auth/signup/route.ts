@@ -14,6 +14,12 @@ export async function POST(req: Request) {
     if (existing) {
       return NextResponse.json({ error: 'Email already registered' }, { status: 400 })
     }
+    if (role === 'admin') {
+      const adminExists = await prisma.profiles.findFirst({ where: { role: 'admin' } })
+      if (adminExists) {
+        return NextResponse.json({ error: 'Admin already exists' }, { status: 400 })
+      }
+    }
     const hashed = await bcrypt.hash(password, 10)
     const user = await prisma.profiles.create({
       data: { email, name, role, hashed_password: hashed },
